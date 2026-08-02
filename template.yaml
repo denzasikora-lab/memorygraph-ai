@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: MemoryGraph AI API, durable Lambda agent worker, and S3 artifacts
+
+Parameters:
+  CockroachDatabaseUrl:
+    Type: String
+    NoEcho: true
+    Description: CockroachDB Cloud SQLAlchemy URL (never commit this value)
+  EmbeddingDimensions:
+    Type: Number
+    Default: 64
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 30
+    MemorySize: 512
+    Environment:
+      Variables:
+        MEMORYGRAPH_DATABASE_URL: !Ref CockroachDatabaseUrl
+        MEMORYGRAPH_EMBEDDING_DIMENSIONS: !Ref EmbeddingDimensions
+        MEMORYGRAPH_MOCK_LLM: 'true'
+        MEMORYGRAPH_S3_BUCKET: !Ref ArtifactBucket
+
+Resources:
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: aws.api_handler.handler
+      Policies:
+        - S3WritePolicy: {BucketName: !Ref ArtifactBucket}
+      Events:
+        Api:
+          Type: HttpApi
+          Properties: {Path: '/{proxy+}', Method: ANY}
+  AgentWorker:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: backend/
+      Handler: aws.lambda_handler.handler
+      Policies:
+        - S3WritePolicy: {BucketName: !Ref ArtifactBucket}
+
+Outputs:
+  ApiUrl:
+    Description: Configure this as the GitHub variable MEMORYGRAPH_API_URL
+    Value: !Sub 'https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com'
+  ArtifactBucketName:
+    Value: !Ref ArtifactBucket

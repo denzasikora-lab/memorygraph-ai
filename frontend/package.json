@@ -1,0 +1,9 @@
+{
+  "name": "memorygraph-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {"dev": "vite", "build": "tsc --noEmit && vite build", "lint": "tsc --noEmit"},
+  "dependencies": {"@vitejs/plugin-react": "latest", "vite": "latest", "react": "latest", "react-dom": "latest"},
+  "devDependencies": {"@types/react": "latest", "@types/react-dom": "latest", "typescript": "latest"}
+}

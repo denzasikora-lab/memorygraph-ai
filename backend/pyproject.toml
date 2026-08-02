@@ -1,0 +1,20 @@
+[project]
+name = "memorygraph-ai"
+version = "0.1.0"
+description = "Persistent multi-agent memory on CockroachDB"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+  "alembic>=1.14", "boto3>=1.35", "fastapi>=0.115", "mangum>=0.19", "psycopg[binary]>=3.2",
+  "pydantic>=2.10", "sqlalchemy>=2.0", "uvicorn[standard]>=0.32"
+]
+
+[dependency-groups]
+dev = ["httpx>=0.28", "pytest>=8.3", "pytest-cov>=6.0", "ruff>=0.8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
